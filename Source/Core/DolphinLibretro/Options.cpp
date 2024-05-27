@@ -114,37 +114,6 @@ Option<bool>::Option(const char* id, const char* name, bool initial) : m_id(id),
   Register();
 }
 
-template <typename T>
-bool Option<T>::Updated()
-{
-  if (m_dirty)
-  {
-    m_dirty = false;
-
-    retro_variable var{m_id};
-    T value = m_list.front().second;
-
-    if (environ_cb && environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-    {
-      for (auto option : m_list)
-      {
-        if (option.first == var.value)
-        {
-          value = option.second;
-          break;
-        }
-      }
-    }
-
-    if (m_value != value)
-    {
-      m_value = value;
-      return true;
-    }
-  }
-  return false;
-}
-
 Option<int> efbScale("ishiiruka_efb_scale", "EFB Scale", 1,
                      {"x1 (640 x 528)", "x2 (1280 x 1056)", "x3 (1920 x 1584)", "x4 (2560 * 2112)",
                       "x5 (3200 x 2640)", "x6 (3840 x 3168)"});
