@@ -73,7 +73,7 @@ typedef struct _Nv_Stereo_Image_Header
 // GX pipeline state
 struct GXPipelineState
 {
-  std::array<SamplerState, 8> samplers;
+  std::array<SamplerState, 16> samplers;
   BlendingState blend;
   DepthState zmode;
   RasterizationState raster;
@@ -764,7 +764,6 @@ void Renderer::ApplyState(bool bUseDstAlpha)
   D3D::stateman->PushRasterizerState(s_gx_state_cache.Get(s_gx_state.raster));
   for (u32 stage = 0; stage < static_cast<u32>(s_gx_state.samplers.size()); stage++)
     D3D::stateman->SetSampler(stage, s_gx_state_cache.Get(s_gx_state.samplers[stage]));
-
   D3D::BufferDescriptor vbuffer = VertexShaderCache::GetConstantBuffer();
   D3D::BufferDescriptor pbuffer = PixelShaderCache::GetConstantBuffer();
   ID3D11GeometryShader* geometry_shader = GeometryShaderCache::GetActiveShader();

@@ -3,40 +3,36 @@
 // Refer to the license.txt file included.
 
 #include <memory>
-#ifndef __LIBRETRO__
 #include <wx/wx.h>
-#endif
 
 #include "Common/Logging/LogManager.h"
 
+#include "Core/Core.h"
+#include "Core/Host.h"
 #include "VideoCommon/BPStructs.h"
 #include "VideoCommon/CommandProcessor.h"
 #include "VideoCommon/Fifo.h"
 #include "VideoCommon/GeometryShaderManager.h"
-#include "VideoCommon/TessellationShaderManager.h"
 #include "VideoCommon/OnScreenDisplay.h"
 #include "VideoCommon/OpcodeDecoding.h"
 #include "VideoCommon/PixelEngine.h"
 #include "VideoCommon/PixelShaderManager.h"
-#include "VideoCommon/VideoConfig.h"
+#include "VideoCommon/TessellationShaderManager.h"
 #include "VideoCommon/VertexLoaderManager.h"
 #include "VideoCommon/VertexShaderManager.h"
-#include "Core/Core.h"
-#include "Core/Host.h"
+#include "VideoCommon/VideoConfig.h"
 
-#ifndef __LIBRETRO__
-#include "DolphinWX/Debugger/DebuggerPanel.h"
-#endif
-#include "VideoCommon/IndexGenerator.h"
 #include "Common/FileUtil.h"
 #include "Common/IniFile.h"
 #ifndef __LIBRETRO__
+#include "DolphinWX/Debugger/DebuggerPanel.h"
 #include "DolphinWX/VideoConfigDiag.h"
 #endif
+#include "VideoCommon/IndexGenerator.h"
 
 #include "VideoBackends/DX11/BoundingBox.h"
-#include "VideoBackends/DX11/D3DUtil.h"
 #include "VideoBackends/DX11/D3DBase.h"
+#include "VideoBackends/DX11/D3DUtil.h"
 #include "VideoBackends/DX11/GeometryShaderCache.h"
 #include "VideoBackends/DX11/HullDomainShaderCache.h"
 #include "VideoBackends/DX11/PerfQuery.h"
@@ -46,13 +42,11 @@
 #include "VideoBackends/DX11/VertexManager.h"
 #include "VideoBackends/DX11/VertexShaderCache.h"
 
-#include "VideoBackends/DX11/VideoBackend.h"
 #include "Core/ConfigManager.h"
+#include "VideoBackends/DX11/VideoBackend.h"
 
 namespace DX11
 {
-   static bool s_create_device;
-
 unsigned int VideoBackend::PeekMessages()
 {
   MSG msg;
@@ -79,7 +73,8 @@ std::string VideoBackend::GetDisplayName() const
 void VideoBackend::InitBackendInfo()
 {
   HRESULT hr = DX11::D3D::LoadDXGI();
-  if (SUCCEEDED(hr)) hr = DX11::D3D::LoadD3D();
+  if (SUCCEEDED(hr))
+    hr = DX11::D3D::LoadD3D();
   if (FAILED(hr))
   {
     DX11::D3D::UnloadDXGI();
@@ -117,7 +112,8 @@ void VideoBackend::InitBackendInfo()
   // adapters
   g_Config.backend_info.Adapters.clear();
   g_Config.backend_info.AAModes.clear();
-  while (factory->EnumAdapters((UINT)g_Config.backend_info.Adapters.size(), &ad) != DXGI_ERROR_NOT_FOUND)
+  while (factory->EnumAdapters((UINT)g_Config.backend_info.Adapters.size(), &ad) !=
+         DXGI_ERROR_NOT_FOUND)
   {
     const size_t adapter_index = g_Config.backend_info.Adapters.size();
 
@@ -147,7 +143,8 @@ void VideoBackend::InitBackendInfo()
       g_Config.backend_info.bSupportsSSAA = shader_model_5_supported;
       g_Config.backend_info.bSupportsGPUTextureDecoding = shader_model_5_supported;
       g_Config.backend_info.bSupportsComputeTextureEncoding = shader_model_5_supported;
-      g_Config.backend_info.MaxTextureSize = DX11::D3D::GetMaxTextureSize(DX11::D3D::GetFeatureLevel(ad));
+      g_Config.backend_info.MaxTextureSize =
+          DX11::D3D::GetMaxTextureSize(DX11::D3D::GetFeatureLevel(ad));
     }
 
     g_Config.backend_info.Adapters.push_back(UTF16ToUTF8(desc.Description));
@@ -160,12 +157,10 @@ void VideoBackend::InitBackendInfo()
   DX11::D3D::UnloadD3D();
 }
 
-bool VideoBackend::Initialize(void *window_handle)
+bool VideoBackend::Initialize(void* window_handle)
 {
-  s_create_device = (D3D::device == nullptr);
-  if (s_create_device && (window_handle == nullptr))
+  if (window_handle == nullptr)
     return false;
-
   InitBackendInfo();
   InitializeShared();
   m_window_handle = window_handle;
@@ -176,10 +171,10 @@ void VideoBackend::Video_Prepare()
 {
   // internal interfaces
   g_renderer = std::make_unique<Renderer>(m_window_handle);
-  g_renderer->Init();
   g_texture_cache = std::make_unique<TextureCache>();
   g_vertex_manager = std::make_unique<VertexManager>();
   g_perf_query = std::make_unique<PerfQuery>();
+  g_renderer->Init();
   VertexShaderCache::Init();
   PixelShaderCache::Init();
   GeometryShaderCache::Init();
@@ -211,4 +206,4 @@ void VideoBackend::Video_Cleanup()
   CleanupShared();
 }
 
-}
+}  // namespace DX11
